@@ -28,6 +28,8 @@ void ofApp::update(){
 	fdge_rve_sound();
 	fdge_rve_video_start();
 	fdge_rve_video_update();
+	fdge_rve_case();
+	if (rve_scene_change == true) { fdge_rve_changescene(); }
 }
 
 //--------------------------------------------------------------
@@ -83,7 +85,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
 	x -= ofGetWidth() / 2;
 	y -= ofGetHeight() / 2;
-	cout << "x" << x << "y" << y << endl;
+	//cout << "x" << x << "y" << y << endl;
 	fdge_rve_click_box(x, y);
 }
 

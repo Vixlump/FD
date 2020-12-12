@@ -22,6 +22,7 @@ struct rve_itemcase {
 	string name;
 	string equto;
 	string result;
+	vector <string> action;
 };
 struct rve_clickbox {
 	int x1;
@@ -50,6 +51,9 @@ vector <ofSoundPlayer> rve_sounds;
 vector <rve_clickbox> rve_click_box;
 vector <rve_item> rve_items;
 vector <rve_itemcase> rve_case;
+bool rve_scene_change = false;
+string rve_scene_new = "";
+
 
 void fdge_rve_resolution() { ofSetWindowShape(rve_x, rve_y); }
 void fdge_rve_fullscreen() { ofToggleFullscreen(); }
@@ -114,7 +118,7 @@ void fdge_rve_click_box(int x, int y) {
 			while (rve_cnt2 < rve_items.size()) {
 				if (rve_items[rve_cnt2].item_id == rve_click_box[rve_cnt].item_name) {
 					rve_items[rve_cnt2].item_value = rve_click_box[rve_cnt].item_value;
-					cout << "rve_items:" << rve_items[rve_cnt2].item_id << ";" << rve_items[rve_cnt2].item_value << endl;
+					//cout << "rve_items:" << rve_items[rve_cnt2].item_id << ";" << rve_items[rve_cnt2].item_value << endl;
 				}
 				rve_cnt2 += 1;
 			}
@@ -124,7 +128,37 @@ void fdge_rve_click_box(int x, int y) {
 }
 bool fdge_rve_over_box() { return false; }
 void fdge_rve_item() {}
-void fdge_rve_case() {}
+unsigned int fdge_rve_case_check(string input_case) {
+	if (input_case == "change_scene") {
+		return 1;
+	} else if (input_case == "edit_item") {
+		return 2;
+	} else if (input_case == "draw_image") {
+		return 5;
+	} else if (input_case == "draw_video") {
+		return 6;
+	} else if (input_case == "draw_sprite") {
+		return 6;
+	} else if (input_case == "quit") {
+		return 0;
+	} else if (input_case == "new_click_box") {
+		return 6;
+	} else if (input_case == "new_over_box") {
+		return 6;
+	} else if (input_case == "play_sound") {
+		return 2;
+	} else if (input_case == "edit_music") {
+		return 2;
+	} else if (input_case == "keypressed") {
+		return 3;
+	} else if (input_case == "edit_background") {
+		return 6;
+	} else {
+		return 0;
+	}
+
+}
+
 void fdge_rve_translate() {
 	unsigned int rve_cnt = 0;
 	while (rve_cnt < rve_lines.size()) {
@@ -211,9 +245,17 @@ void fdge_rve_translate() {
 			rve_items.push_back(input_item);
 		} else if (rve_lines[rve_cnt] == "case:") {
 			rve_itemcase input_case;
+			unsigned int rve_cnt2 = 0;
+			unsigned int rve_max = 0;
 			rve_cnt += 1; input_case.name = rve_lines[rve_cnt];
 			rve_cnt += 1; input_case.equto = rve_lines[rve_cnt];
 			rve_cnt += 1; input_case.result = rve_lines[rve_cnt];
+			rve_max = fdge_rve_case_check(input_case.result);
+			while (rve_cnt2 < rve_max) {
+				rve_cnt += 1; input_case.action.push_back(rve_lines[rve_cnt]);
+				cout << input_case.action[rve_cnt2] << endl;
+				rve_cnt2 += 1;
+			}
 			rve_case.push_back(input_case);
 		} else if (rve_lines[rve_cnt] == "save:") {
 
@@ -232,7 +274,11 @@ void fdge_rve_translate() {
 		} else if (rve_lines[rve_cnt] == "scale:") {
 
 		} else if (rve_lines[rve_cnt] == "scene:") {
-
+			rve_scene_change = true;
+			rve_cnt += 1; rve_scene_new = "scenes/" + rve_lines[rve_cnt] + ".rve.fdge";
+		} else if (rve_lines[rve_cnt] == "print:") {
+			rve_cnt += 1;
+			for (int i = 0; i < rve_items.size(); i++) { if (rve_items[i].item_id == rve_lines[rve_cnt]) { cout << "FDGE.RVE: " << rve_items[i].item_value << endl; break; } }
 		}
 		rve_cnt += 1;
 	}
@@ -257,7 +303,34 @@ void fdge_rve_changescene() {
 	rve_sounds.clear();
 	rve_click_box.clear();
 	rve_case.clear();
+	fdge_rve_register(rve_scene_new);
+	rve_scene_change = false;
 }
 void fdge_rve_save() {}
 void fdge_rve_load() {}
 void fdge_rve_draw() {}
+
+void fdge_rve_case() {
+	if (rve_case.empty()==false) {
+		unsigned int rve_cnt = 0;
+		while (rve_cnt < rve_case.size()) {
+			unsigned int rve_cnt2 = 0;
+			while (rve_cnt2 < rve_items.size()) {
+				if ((rve_case[rve_cnt].name==rve_items[rve_cnt2].item_id)and(rve_case[rve_cnt].equto==rve_items[rve_cnt2].item_value)) {
+					if (rve_case[rve_cnt].result == "change_scene") {
+						rve_scene_change = true;
+						rve_scene_new = "scenes/" + rve_case[rve_cnt].action[0] + ".rve.fdge";
+					} else if (rve_case[rve_cnt].result == "edit_item") {
+						for (int i = 0; i < rve_items.size(); i++) {
+							if (rve_items[i].item_id == rve_case[rve_cnt].action[0]) { rve_items[i].item_value = rve_case[rve_cnt].action[1]; break; }
+						}
+					} else if (rve_case[rve_cnt].result == "quit") {
+						ofExit();
+					}
+				}
+				rve_cnt2 += 1;
+			}
+			rve_cnt += 1;
+		}
+	}
+}

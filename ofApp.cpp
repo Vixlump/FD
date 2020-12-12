@@ -81,6 +81,9 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+	x -= ofGetWidth() / 2;
+	y -= ofGetHeight() / 2;
+	cout << "x" << x << "y" << y << endl;
 	fdge_rve_click_box(x, y);
 }
 

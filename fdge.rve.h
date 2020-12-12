@@ -114,6 +114,7 @@ void fdge_rve_click_box(int x, int y) {
 			while (rve_cnt2 < rve_items.size()) {
 				if (rve_items[rve_cnt2].item_id == rve_click_box[rve_cnt].item_name) {
 					rve_items[rve_cnt2].item_value = rve_click_box[rve_cnt].item_value;
+					cout << "rve_items:" << rve_items[rve_cnt2].item_id << ";" << rve_items[rve_cnt2].item_value << endl;
 				}
 				rve_cnt2 += 1;
 			}
@@ -204,7 +205,10 @@ void fdge_rve_translate() {
 		} else if (rve_lines[rve_cnt] == "gui:") {
 
 		} else if (rve_lines[rve_cnt] == "item:") {
-
+			rve_item input_item;
+			rve_cnt += 1; input_item.item_id = rve_lines[rve_cnt];
+			rve_cnt += 1; input_item.item_value = rve_lines[rve_cnt];
+			rve_items.push_back(input_item);
 		} else if (rve_lines[rve_cnt] == "case:") {
 			rve_itemcase input_case;
 			rve_cnt += 1; input_case.name = rve_lines[rve_cnt];

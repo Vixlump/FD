@@ -53,6 +53,8 @@ vector <rve_item> rve_items;
 vector <rve_itemcase> rve_case;
 bool rve_scene_change = false;
 string rve_scene_new = "";
+ofstream rve_saver;
+ifstream rve_loader;
 
 
 void fdge_rve_resolution() { ofSetWindowShape(rve_x, rve_y); }
@@ -253,13 +255,25 @@ void fdge_rve_translate() {
 			rve_max = fdge_rve_case_check(input_case.result);
 			while (rve_cnt2 < rve_max) {
 				rve_cnt += 1; input_case.action.push_back(rve_lines[rve_cnt]);
-				cout << input_case.action[rve_cnt2] << endl;
 				rve_cnt2 += 1;
 			}
 			rve_case.push_back(input_case);
 		} else if (rve_lines[rve_cnt] == "save:") {
-
+			rve_cnt += 1; rve_saver.open(rve_lines[rve_cnt]);
+			for (int i = 0; i < rve_items.size(); i++) { rve_saver << rve_items[i].item_id + ";" + rve_items[i].item_value; rve_saver << endl; }
+			rve_saver.close();
 		} else if (rve_lines[rve_cnt] == "load:") {
+			rve_cnt += 1; rve_loader.open(rve_lines[rve_cnt]); 
+			string input_string; vector <string> all_items; rve_items.clear();
+			while (getline(rve_loader, input_string)) { all_items.push_back(input_string); }
+			rve_loader.close(); vector <string> passable_items; rve_item pusher_backer;
+			for (int i = 0; i < all_items.size(); i++) {
+				passable_items.clear(); stringstream check_list(all_items[i]);
+				while (getline(check_list, input_string, ';')) { passable_items.push_back(input_string); }
+				pusher_backer.item_id = passable_items[0]; pusher_backer.item_value = passable_items[1];
+				rve_items.push_back(pusher_backer);
+			}
+		} else if (rve_lines[rve_cnt] == "reset_save:") {
 
 		} else if (rve_lines[rve_cnt] == "quit:") {
 			ofExit();
@@ -280,7 +294,7 @@ void fdge_rve_translate() {
 			rve_cnt += 1; rve_scene_new = "scenes/" + rve_lines[rve_cnt] + ".rve.fdge";
 		} else if (rve_lines[rve_cnt] == "print:") {
 			rve_cnt += 1;
-			for (int i = 0; i < rve_items.size(); i++) { if (rve_items[i].item_id == rve_lines[rve_cnt]) { cout << "FDGE.RVE: " << rve_items[i].item_value << endl; break; } }
+			for (int i = 0; i < rve_items.size(); i++) { if (rve_items[i].item_id == rve_lines[rve_cnt]) { cout << "FDGE.RVE."<< rve_items[i].item_id<< ": " << rve_items[i].item_value << endl; break; } }
 		} else if (rve_lines[rve_cnt] == "reset_items:") {
 			rve_items.clear();
 		}
@@ -330,6 +344,8 @@ void fdge_rve_case() {
 						}
 					} else if (rve_case[rve_cnt].result == "quit") {
 						ofExit();
+					} else if (rve_case[rve_cnt].result == "reset_items") {
+						rve_items.clear();
 					}
 				}
 				rve_cnt2 += 1;

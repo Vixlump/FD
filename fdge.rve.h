@@ -273,12 +273,16 @@ void fdge_rve_translate() {
 
 		} else if (rve_lines[rve_cnt] == "scale:") {
 
+		} else if (rve_lines[rve_cnt] == "delay:") {
+
 		} else if (rve_lines[rve_cnt] == "scene:") {
 			rve_scene_change = true;
 			rve_cnt += 1; rve_scene_new = "scenes/" + rve_lines[rve_cnt] + ".rve.fdge";
 		} else if (rve_lines[rve_cnt] == "print:") {
 			rve_cnt += 1;
 			for (int i = 0; i < rve_items.size(); i++) { if (rve_items[i].item_id == rve_lines[rve_cnt]) { cout << "FDGE.RVE: " << rve_items[i].item_value << endl; break; } }
+		} else if (rve_lines[rve_cnt] == "reset_items:") {
+			rve_items.clear();
 		}
 		rve_cnt += 1;
 	}

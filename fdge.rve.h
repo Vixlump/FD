@@ -4,6 +4,17 @@ struct rve_item {
 	string item_id;
 	string item_value;
 };
+struct rve_sprite {
+	ofImage sprite;
+	vector <int> key_x;
+	vector <int> key_y;
+	bool ani;
+	int speed;
+	int dim_x;
+	int dim_y;
+	int cols;
+	int rows;
+};
 struct rve_image {
 	ofImage img;
 	int x;
@@ -32,6 +43,20 @@ struct rve_clickbox {
 	string item_name;
 	string item_value;
 };
+struct rve_time {
+	chrono::high_resolution_clock::time_point start;
+	double seconds;
+	string item_name;
+	string new_value;
+};
+
+struct rve_3d {
+	ofMesh model;
+	ofVec3f pos;
+	ofVec3f trans;
+	ofVec3f scale;
+	ofVec3f rot;
+};
 
 ifstream rve_reader;
 vector <string> rve_lines;
@@ -55,8 +80,7 @@ bool rve_scene_change = false;
 string rve_scene_new = "";
 ofstream rve_saver;
 ifstream rve_loader;
-
-
+vector <rve_time> rve_delays;
 void fdge_rve_resolution() { ofSetWindowShape(rve_x, rve_y); }
 void fdge_rve_fullscreen() { ofToggleFullscreen(); }
 
@@ -287,8 +311,15 @@ void fdge_rve_translate() {
 
 		} else if (rve_lines[rve_cnt] == "scale:") {
 
-		} else if (rve_lines[rve_cnt] == "delay:") {
+		} else if (rve_lines[rve_cnt] == "3d:") {
 
+		} else if (rve_lines[rve_cnt] == "delay:") {
+			rve_time input_time;
+			rve_cnt += 1; input_time.seconds = atof(rve_lines[rve_cnt].c_str());
+			rve_cnt += 1; input_time.item_name = rve_lines[rve_cnt];
+			rve_cnt += 1; input_time.new_value = rve_lines[rve_cnt];
+			input_time.start = chrono::high_resolution_clock::now();
+			rve_delays.push_back(input_time);
 		} else if (rve_lines[rve_cnt] == "scene:") {
 			rve_scene_change = true;
 			rve_cnt += 1; rve_scene_new = "scenes/" + rve_lines[rve_cnt] + ".rve.fdge";
@@ -321,8 +352,26 @@ void fdge_rve_changescene() {
 	rve_sounds.clear();
 	rve_click_box.clear();
 	rve_case.clear();
+	rve_delays.clear();
 	fdge_rve_register(rve_scene_new);
 	rve_scene_change = false;
+}
+
+void fdge_rve_delay() {
+	if (rve_delays.empty() == false) {
+		double comparitor;
+		for (int i = 0; i < rve_delays.size(); i++) {
+			auto time_current_test = chrono::high_resolution_clock::now();
+			comparitor = chrono::duration_cast<chrono::seconds>(time_current_test - rve_delays[i].start).count();
+			if (comparitor >= rve_delays[i].seconds) {
+				for (int f = 0; f < rve_items.size(); f++) {
+					if (rve_items[f].item_id == rve_delays[i].item_name) {
+						rve_items[f].item_value = rve_delays[i].new_value; break;
+					}
+				}
+			}
+		}
+	}
 }
 void fdge_rve_save() {}
 void fdge_rve_load() {}

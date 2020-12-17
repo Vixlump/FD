@@ -29,6 +29,7 @@ void ofApp::update(){
 	fdge_rve_video_start();
 	fdge_rve_video_update();
 	fdge_rve_case();
+	fdge_rve_delay();
 	if (rve_scene_change == true) { fdge_rve_changescene(); }
 }
 
